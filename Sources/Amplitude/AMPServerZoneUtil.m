@@ -41,7 +41,7 @@
         default:
             break;
     }
-    return batchMode ? [eventLogUrl stringByAppendingPathComponent:kAMPBatchModeAPIPath] : eventLogUrl;
+    return batchMode ? [eventLogUrl stringByAppendingString:kAMPBatchModeAPIPath] : eventLogUrl;
 }
 
 + (NSString *)getDynamicConfigApi:(AMPServerZone)serverZone {
