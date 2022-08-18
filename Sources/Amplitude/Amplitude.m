@@ -1031,23 +1031,40 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         if (response != nil) {
             if ([httpResponse statusCode] == 200) {
                 NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                if ([result isEqualToString:@"success"]) {
+                if (_batchMode) {
+                    NSError *jsonParseError = nil;
+                    NSDictionary *jsonValues = [NSJSONSerialization JSONObjectWithData:data options:nil error:&jsonParseError];
+                    if (jsonParseError != nil) {
+                        int ingested = [jsonValues[@"events_ingested"] intValue];
+                        if (ingested == numEvents) {
+                            uploadSuccessful = YES;
+                        } else {
+                            AMPLITUDE_ERROR(@"ERROR: %d events were expected, but only %d were received.", numEvents, ingested);
+                        }
+                    } else {
+                        AMPLITUDE_ERROR(@"ERROR: Could not parse JSON response %@", jsonParseError);
+                    }
+                } else {
+                    if ([result isEqualToString:@"success"]) {
+                        uploadSuccessful = YES;
+                    } else if ([result isEqualToString:@"invalid_api_key"]) {
+                        AMPLITUDE_ERROR(@"ERROR: Invalid API Key, make sure your API key is correct in initializeApiKey:");
+                    } else if ([result isEqualToString:@"bad_checksum"]) {
+                        AMPLITUDE_ERROR(@"ERROR: Bad checksum, post request was mangled in transit, will attempt to reupload later");
+                    } else if ([result isEqualToString:@"request_db_write_failed"]) {
+                        AMPLITUDE_ERROR(@"ERROR: Couldn't write to request database on server, will attempt to reupload later");
+                    } else {
+                        AMPLITUDE_ERROR(@"ERROR: %@, will attempt to reupload later", result);
+                    }
+                }
+                if (uploadSuccessful) {
                     // success, remove existing events from dictionary
-                    uploadSuccessful = YES;
                     if (maxEventId >= 0) {
                         (void) [self.dbHelper removeEvents:maxEventId];
                     }
                     if (maxIdentifyId >= 0) {
                         (void) [self.dbHelper removeIdentifys:maxIdentifyId];
                     }
-                } else if ([result isEqualToString:@"invalid_api_key"]) {
-                    AMPLITUDE_ERROR(@"ERROR: Invalid API Key, make sure your API key is correct in initializeApiKey:");
-                } else if ([result isEqualToString:@"bad_checksum"]) {
-                    AMPLITUDE_ERROR(@"ERROR: Bad checksum, post request was mangled in transit, will attempt to reupload later");
-                } else if ([result isEqualToString:@"request_db_write_failed"]) {
-                    AMPLITUDE_ERROR(@"ERROR: Couldn't write to request database on server, will attempt to reupload later");
-                } else {
-                    AMPLITUDE_ERROR(@"ERROR: %@, will attempt to reupload later", result);
                 }
             } else if ([httpResponse statusCode] == 413) {
                 // If blocked by one massive event, drop it
