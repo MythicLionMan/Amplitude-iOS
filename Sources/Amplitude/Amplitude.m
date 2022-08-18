@@ -1035,14 +1035,14 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                     NSError *jsonParseError = nil;
                     NSDictionary *jsonValues = [NSJSONSerialization JSONObjectWithData:data options:nil error:&jsonParseError];
                     if (jsonParseError != nil) {
+                        AMPLITUDE_ERROR(@"ERROR: Could not parse JSON response %@", jsonParseError);
+                    } else {
                         int ingested = [jsonValues[@"events_ingested"] intValue];
                         if (ingested == numEvents) {
                             uploadSuccessful = YES;
                         } else {
                             AMPLITUDE_ERROR(@"ERROR: %d events were expected, but only %d were received.", numEvents, ingested);
                         }
-                    } else {
-                        AMPLITUDE_ERROR(@"ERROR: Could not parse JSON response %@", jsonParseError);
                     }
                 } else {
                     if ([result isEqualToString:@"success"]) {
