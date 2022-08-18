@@ -949,7 +949,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     if (_batchMode) {
         NSArray *postArray = @{
-            @"api-key": self.apiKey,
+            @"api_key": self.apiKey,
             @"events": events
         };
 
