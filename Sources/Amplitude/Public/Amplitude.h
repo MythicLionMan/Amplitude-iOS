@@ -668,6 +668,10 @@ typedef void (^AMPInitCompletionBlock)(void);
  */
 - (void)setServerZone:(AMPServerZone)serverZone updateServerUrl:(BOOL)updateServerUrl;
 
+- (void)setBatchMode:(BOOL)batchMode;
+
+- (void)setBatchMode:(BOOL)batchMode updateServerUrl:(BOOL)updateServerUrl;
+
 /**
  * Adds a new middleware function to run on each logEvent() call prior to sending to Amplitude.
  */

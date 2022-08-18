@@ -26,7 +26,7 @@
 
 @interface AMPServerZoneUtil : NSObject
 
-+ (NSString *)getEventLogApi:(AMPServerZone)serverZone;
++ (NSString *)getEventLogApi:(AMPServerZone)serverZone batchMode:(BOOL)batchMode;
 
 + (NSString *)getDynamicConfigApi:(AMPServerZone)serverZone;
 

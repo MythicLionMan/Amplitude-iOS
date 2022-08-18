@@ -28,7 +28,7 @@
 
 @implementation AMPServerZoneUtil
 
-+ (NSString *)getEventLogApi:(AMPServerZone)serverZone {
++ (NSString *)getEventLogApi:(AMPServerZone)serverZone batchMode:(BOOL)batchMode {
     NSString *eventLogUrl = kAMPEventLogUrl;
     switch (serverZone) {
         case EU:
@@ -41,7 +41,7 @@
         default:
             break;
     }
-    return eventLogUrl;
+    return batchMode ? [eventLogUrl stringByAppendingPathComponent:kAMPBatchModeAPIPath] : eventLogUrl;
 }
 
 + (NSString *)getDynamicConfigApi:(AMPServerZone)serverZone {

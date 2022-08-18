@@ -142,6 +142,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     AMPPlan *_plan;
     AMPServerZone _serverZone;
     AMPMiddlewareRunner *_middlewareRunner;
+    BOOL _batchMode;
 }
 
 #pragma clang diagnostic push
@@ -205,6 +206,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         _offline = NO;
         _serverUrl = kAMPEventLogUrl;
         _serverZone = US;
+        _batchMode = NO;
         self.libraryName = kAMPLibrary;
         self.libraryVersion = kAMPVersion;
         self.contentTypeHeader = kAMPContentTypeHeader;
@@ -945,7 +947,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 - (void)makeEventUploadPostRequest:(NSString *)url events:(NSArray *)events numEvents:(long)numEvents maxEventId:(long long)maxEventId maxIdentifyId:(long long)maxIdentifyId {
     NSMutableURLRequest *request =[NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
 
-    if ([self.contentTypeHeader containsString:@"application/json"]) {
+    if (_batchMode) {
         NSArray *postArray = @{
             @"api-key": self.apiKey,
             @"events": events
@@ -1520,7 +1522,19 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 - (void)setServerZone:(AMPServerZone)serverZone updateServerUrl:(BOOL)updateServerUrl {
     _serverZone = serverZone;
     if (updateServerUrl) {
-        [self setServerUrl:[AMPServerZoneUtil getEventLogApi:serverZone]];
+        [self setServerUrl:[AMPServerZoneUtil getEventLogApi:serverZone batchMode: _batchMode]];
+    }
+}
+
+- (void)setBatchMode:(BOOL)batchMode {
+    [self setBatchMode:batchMode updateServerUrl:YES];
+}
+
+- (void)setBatchMode:(BOOL)batchMode updateServerUrl:(BOOL)updateServerUrl {
+    _batchMode = batchMode;
+    if (updateServerUrl) {
+        [self setServerUrl:[AMPServerZoneUtil getEventLogApi:_serverZone batchMode: _batchMode]];
+        _contentTypeHeader = batchMode ? kAMPBatchContentTypeHeader : kAMPContentTypeHeader;
     }
 }
 
