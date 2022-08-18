@@ -962,7 +962,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             return;
         }
 
-        request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[url stringByAppendingPathComponent:@"batch"]]];
+        request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
         [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[postData length]] forHTTPHeaderField:@"Content-Length"];
         [request setHTTPBody:postData];
     } else {
