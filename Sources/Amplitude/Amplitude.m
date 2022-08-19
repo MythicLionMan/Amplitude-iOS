@@ -1104,8 +1104,12 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         }
 
         self->_updatingCurrently = NO;
+        BOOL willBackoff = uploadSuccessful && [self.dbHelper getEventCount] > self.eventUploadThreshold;
+        if (self.uploadCompleteBlock != nil) {
+            self.uploadCompleteBlock(self, uploadSuccessful, willBackoff);
+        }
 
-        if (uploadSuccessful && [self.dbHelper getEventCount] > self.eventUploadThreshold) {
+        if (willBackoff) {
             int limit = self->_backoffUpload ? self->_backoffUploadBatchSize : 0;
             [self uploadEventsWithLimit:limit];
     #if !TARGET_OS_OSX && !TARGET_OS_WATCH
@@ -1703,8 +1707,16 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     return [NSDate date];
 }
 
+- (int)eventCount {
+    return [self.dbHelper getEventCount];
+}
+
 - (void)printEventsCount {
     AMPLITUDE_LOG(@"Events count:%ld", (long) [self.dbHelper getEventCount]);
+}
+
+- (void)waitForBackgroundTasksToComplete {
+    [self.backgroundQueue waitUntilAllOperationsAreFinished];
 }
 
 #pragma mark - Compatibility

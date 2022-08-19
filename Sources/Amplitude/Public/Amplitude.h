@@ -31,9 +31,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class Amplitude;
+
 typedef NSString *_Nonnull (^AMPAdSupportBlock)(void);
 typedef NSDictionary *_Nullable (^AMPLocationInfoBlock)(void);
 typedef void (^AMPInitCompletionBlock)(void);
+typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallback);
+
 /**
  Amplitude iOS SDK.
 
@@ -185,6 +189,11 @@ typedef void (^AMPInitCompletionBlock)(void);
 @property (nonatomic, copy, readonly) NSString *contentTypeHeader;
 
 /**
+ * Returns the number of events stored locally that have not been sent to the server.
+ */
+@property (nonatomic, readonly) int eventCount;
+
+/**
  * Sets a block to be called after completely initialized.
  *
  * Example:
@@ -194,6 +203,16 @@ typedef void (^AMPInitCompletionBlock)(void);
  *  };
  */
 @property (nonatomic, strong, nullable) AMPInitCompletionBlock initCompletionBlock;
+
+/**
+ * Sets a block to be called whenever an upload finishes.
+ *
+ * Example:
+ *  amp.uploadCompleteBlock = ^(Amplitude amp, BOOL success, BOOL fallback){
+ *     NSLog(@"deviceId: %@, userId: %@", amp.deviceId, amp.userId);
+ *  };
+ */
+@property (nonatomic, strong, nullable) AMPUploadCompleteBlock uploadCompleteBlock;
 
 #pragma mark - Methods
 
@@ -737,6 +756,13 @@ typedef void (^AMPInitCompletionBlock)(void);
 
 
 - (NSString *)getContentTypeHeader;
+
+/**
+ * Blocks the current thread until all pending background tasks are complete. This will block until all scheduled actions are complete,
+ * but there may still be pending NSURLSession upload tasks. This method may block indefinitely, so it is only useful in a background
+ * tool.
+ */
+- (void)waitForBackgroundTasksToComplete;
 
 @end
 
