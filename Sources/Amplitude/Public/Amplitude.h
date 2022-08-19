@@ -125,6 +125,12 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
 @property (nonatomic, assign) int eventUploadPeriodSeconds;
 
 /**
+ * The maximum throttle delay before throttling attempts stop. The throttle delay doubles on each throttle attempt. The default is 0 seconds,
+ * which disables throttling response.
+ */
+@property (nonatomic, assign) int maxThrottleDelay;
+
+/**
  When a user closes and reopens the app within minTimeBetweenSessionsMillis milliseconds, the reopen is considered part of the same session and the session continues. Otherwise, a new session is created. The default is 5 minutes.
  */
 @property (nonatomic, assign) long minTimeBetweenSessionsMillis;

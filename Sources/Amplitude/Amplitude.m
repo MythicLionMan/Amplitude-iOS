@@ -92,6 +92,7 @@
 @property (nonatomic, assign) long long sessionId;
 @property (nonatomic, assign) BOOL backoffUpload;
 @property (nonatomic, assign) int backoffUploadBatchSize;
+@property (nonatomic, assign) int throttleDelay;
 @property (nonatomic, copy, readwrite, nullable) NSString *userId;
 @property (nonatomic, copy, readwrite) NSString *deviceId;
 @property (nonatomic, copy, readwrite) NSString *contentTypeHeader;
@@ -222,6 +223,8 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         self.eventMaxCount = kAMPEventMaxCount;
         self.eventUploadMaxBatchSize = kAMPEventUploadMaxBatchSize;
         self.eventUploadPeriodSeconds = kAMPEventUploadPeriodSeconds;
+        self.throttleDelay = 0;
+        self.maxThrottleDelay = kAMPMaxThrottleDelayPeriodSeconds;
         self.minTimeBetweenSessionsMillis = kAMPMinTimeBetweenSessionsMillis;
         _backoffUploadBatchSize = self.eventUploadMaxBatchSize;
         
@@ -1027,6 +1030,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 #endif
     [[[session sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         BOOL uploadSuccessful = NO;
+        BOOL resumeAfterThrottleDelay = NO;
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
         if (response != nil) {
             if ([httpResponse statusCode] == 200) {
@@ -1084,7 +1088,19 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                 AMPLITUDE_LOG(@"Request too large, will decrease size and attempt to reupload");
                 self->_updatingCurrently = NO;
                 [self uploadEventsWithLimit:self->_backoffUploadBatchSize];
+            } else if ([httpResponse statusCode] == 429) {
+                // Double the current throttle delay
+                self.throttleDelay = self.throttleDelay > 0 ? self.throttleDelay*2 : 1;
 
+                if (self.throttleDelay < self.maxThrottleDelay) {
+                    AMPLITUDE_LOG(@"Request throttled. Will retry with a delay of %d seconds.", self.throttleDelay);
+                    // This will block the background queue, but allow the app to continue in the foreground. Normally
+                    // we'd like to not block the queue, but for this case we don't want to allow other queue processes to run.
+                    sleep(self.throttleDelay);
+                    resumeAfterThrottleDelay = YES;
+                } else {
+                    AMPLITUDE_LOG(@"Request throttled.");
+                }
             } else {
                 AMPLITUDE_ERROR(@"ERROR: Connection response received:%ld, %@", (long)[httpResponse statusCode],
                     [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
@@ -1104,12 +1120,12 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         }
 
         self->_updatingCurrently = NO;
-        BOOL willBackoff = uploadSuccessful && [self.dbHelper getEventCount] > self.eventUploadThreshold;
+        BOOL willContinue = (uploadSuccessful || resumeAfterThrottleDelay) && [self.dbHelper getEventCount] > self.eventUploadThreshold;
         if (self.uploadCompleteBlock != nil) {
-            self.uploadCompleteBlock(self, uploadSuccessful, willBackoff);
+            self.uploadCompleteBlock(self, uploadSuccessful, willContinue);
         }
 
-        if (willBackoff) {
+        if (willContinue) {
             int limit = self->_backoffUpload ? self->_backoffUploadBatchSize : 0;
             [self uploadEventsWithLimit:limit];
     #if !TARGET_OS_OSX && !TARGET_OS_WATCH

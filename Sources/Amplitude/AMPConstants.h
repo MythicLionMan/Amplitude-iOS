@@ -47,6 +47,7 @@ extern const int kAMPEventUploadMaxBatchSize;
 extern const int kAMPEventMaxCount;
 extern const int kAMPEventRemoveBatchSize;
 extern const int kAMPEventUploadPeriodSeconds;
+extern const int kAMPMaxThrottleDelayPeriodSeconds;
 extern const long kAMPMinTimeBetweenSessionsMillis;
 extern const int kAMPMaxStringLength;
 extern const int kAMPMaxPropertyKeys;

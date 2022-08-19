@@ -71,6 +71,7 @@ const int kAMPDBFirstVersion = 2; // to detect if DB exists yet
 const int kAMPEventUploadMaxBatchSize = 100;
 const int kAMPEventRemoveBatchSize = 20;
 const int kAMPEventUploadPeriodSeconds = 30; // 30 seconds
+const int kAMPMaxThrottleDelayPeriodSeconds = 0; // 0 seconds
 const long kAMPMinTimeBetweenSessionsMillis = 5 * 60 * 1000; // 5 minutes
 const int kAMPMaxStringLength = 1024;
 const int kAMPMaxPropertyKeys = 1000;
