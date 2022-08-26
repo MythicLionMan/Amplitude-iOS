@@ -750,6 +750,8 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
  */
 - (void)setSessionId:(long long)timestamp;
 
+- (void)endSession;
+
 /**
  Manually forces the instance to immediately upload all unsent events.
 

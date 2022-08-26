@@ -1296,6 +1296,15 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     [self logEvent:sessionEvent withEventProperties:nil withApiProperties:apiProperties withUserProperties:nil withGroups:nil withGroupProperties:nil withTimestamp:timestamp outOfSession:NO];
 }
 
+- (void)endSession {
+    [self runOnBackgroundQueue:^{
+        // If there is a current session this will end it
+        [self sendSessionEvent:kAMPSessionEndEvent];
+        // Ensure that the current session is terminated
+        [self setSessionId:-1];
+    }];
+}
+
 - (BOOL)inSession {
     return _sessionId >= 0;
 }
