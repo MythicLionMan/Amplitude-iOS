@@ -1456,11 +1456,17 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 - (void)setUserId:(NSString *)userId {
-    [self setUserId:userId startNewSession:NO];
+    [self setUserId:userId deviceId:nil startNewSession:NO];
 }
 
 - (void)setUserId:(NSString *)userId startNewSession:(BOOL)startNewSession {
-    if (!(userId == nil || [self isArgument:userId validType:[NSString class] methodName:@"setUserId:"])) {
+    [self setUserId:userId deviceId:nil startNewSession:startNewSession];
+}
+
+- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId startNewSession:(BOOL)startNewSession {
+    BOOL haveUserId = userId != nil && [self isArgument:userId validType:[NSString class] methodName:@"setUserId:"];
+    BOOL haveDeviceId = deviceId != nil && [self isValidDeviceId:deviceId];
+    if (!haveUserId && !haveDeviceId) {
         return;
     }
 
@@ -1469,13 +1475,18 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             [self sendSessionEvent:kAMPSessionEndEvent];
         }
 
-        self->_userId = userId;
-        [self.dbHelper insertOrReplaceKeyValue:USER_ID value:self.userId];
-        
-        // Set the user ID amplitude core instance. This is used to share user identity
-        // between Analytics and Experiment SDKs.
-        id<IdentityStoreEditor> identityStoreEditor = [[[AnalyticsConnector getInstance:self.instanceName] identityStore] editIdentity];
-        [[identityStoreEditor setUserId:self.userId] commit];
+        if (haveDeviceId) {
+            [self backgroundSetDeviceId:deviceId];
+        }
+        if (haveUserId) {
+            self->_userId = userId;
+            [self.dbHelper insertOrReplaceKeyValue:USER_ID value:self.userId];
+            
+            // Set the user ID amplitude core instance. This is used to share user identity
+            // between Analytics and Experiment SDKs.
+            id<IdentityStoreEditor> identityStoreEditor = [[[AnalyticsConnector getInstance:self.instanceName] identityStore] editIdentity];
+            [[identityStoreEditor setUserId:self.userId] commit];
+        }
 
         if (startNewSession) {
             NSNumber *timestamp = [NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000];
@@ -1542,13 +1553,17 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     }
 
     [self runOnBackgroundQueue:^{
-        self->_deviceId = deviceId;
-        [self.dbHelper insertOrReplaceKeyValue:DEVICE_ID value:deviceId];
-        // Set the device ID in the amplitude core instance. This is used to share user identity
-        // between Analytics and Experiment SDKs.
-        id<IdentityStoreEditor> identityStoreEditor = [[[AnalyticsConnector getInstance:self.instanceName] identityStore] editIdentity];
-        [[identityStoreEditor setDeviceId:self.deviceId] commit];
+        [self backgroundSetDeviceId:deviceId];
     }];
+}
+
+- (void)backgroundSetDeviceId:(NSString *)deviceId {
+    self->_deviceId = deviceId;
+    [self.dbHelper insertOrReplaceKeyValue:DEVICE_ID value:deviceId];
+    // Set the device ID in the amplitude core instance. This is used to share user identity
+    // between Analytics and Experiment SDKs.
+    id<IdentityStoreEditor> identityStoreEditor = [[[AnalyticsConnector getInstance:self.instanceName] identityStore] editIdentity];
+    [[identityStoreEditor setDeviceId:self.deviceId] commit];
 }
 
 - (void)regenerateDeviceId {

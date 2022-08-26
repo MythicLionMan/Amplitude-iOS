@@ -593,6 +593,8 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
  */
 - (void)setUserId:(nullable NSString *)userId startNewSession:(BOOL)startNewSession;
 
+- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId startNewSession:(BOOL)startNewSession;
+
 /**
  Sets the deviceId.
 
