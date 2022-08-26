@@ -1465,14 +1465,14 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 - (void)setUserId:(NSString *)userId {
-    [self setUserId:userId deviceId:nil startNewSession:NO];
+    [self setUserId:userId deviceId:nil startNewSession:0];
 }
 
-- (void)setUserId:(NSString *)userId startNewSession:(BOOL)startNewSession {
+- (void)setUserId:(NSString *)userId startNewSession:(kAMPSessionHandling)startNewSession {
     [self setUserId:userId deviceId:nil startNewSession:startNewSession];
 }
 
-- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId startNewSession:(BOOL)startNewSession {
+- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId startNewSession:(kAMPSessionHandling)startNewSession {
     BOOL haveUserId = userId != nil && [self isArgument:userId validType:[NSString class] methodName:@"setUserId:"];
     BOOL haveDeviceId = deviceId != nil && [self isValidDeviceId:deviceId];
     if (!haveUserId && !haveDeviceId) {
@@ -1480,7 +1480,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     }
 
     [self runOnBackgroundQueue:^{
-        if (startNewSession && self->_trackingSessionEvents) {
+        if ((startNewSession & START_SESSION != 0) && self->_trackingSessionEvents) {
             [self sendSessionEvent:kAMPSessionEndEvent];
         }
 
@@ -1497,7 +1497,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             [[identityStoreEditor setUserId:self.userId] commit];
         }
 
-        if (startNewSession) {
+        if (startNewSession & STOP_SESSION != 0) {
             NSNumber *timestamp = [NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000];
             [self setSessionId:[timestamp longLongValue]];
             [self refreshSessionTime:timestamp];
