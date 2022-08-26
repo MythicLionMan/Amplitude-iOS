@@ -614,11 +614,11 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
         [event setValue:[self truncate:[AMPUtils makeJSONSerializable:[self replaceWithEmptyJSON:userProperties]]] forKey:@"user_properties"];
         [event setValue:[self truncate:[AMPUtils validateGroups:[self replaceWithEmptyJSON:groups]]] forKey:@"groups"];
         if (_batchMode) {
-            NSString *legacyID = userProperties[@"legacyID"];
+            NSString *legacyID = eventProperties[@"legacyID"];
             if (legacyID) {
                 [event setValue:legacyID forKey:@"insert_id"];
             }
-            NSString *installationID = userProperties[@"installationID"];
+            NSString *installationID = eventProperties[@"installationID"];
             if (installationID) {
                 [event setValue:installationID forKey:@"device_id"];
             }
