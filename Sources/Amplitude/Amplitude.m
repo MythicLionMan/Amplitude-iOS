@@ -609,14 +609,27 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
         NSMutableDictionary *event = [NSMutableDictionary dictionary];
         [event setValue:eventType forKey:@"event_type"];
+        [event setValue:[NSNumber numberWithLongLong:outOfSession ? -1 : self->_sessionId] forKey:@"session_id"];
         [event setValue:[self truncate:[AMPUtils makeJSONSerializable:[self replaceWithEmptyJSON:eventProperties]]] forKey:@"event_properties"];
-        [event setValue:[self replaceWithEmptyJSON:apiProperties] forKey:@"api_properties"];
         [event setValue:[self truncate:[AMPUtils makeJSONSerializable:[self replaceWithEmptyJSON:userProperties]]] forKey:@"user_properties"];
         [event setValue:[self truncate:[AMPUtils validateGroups:[self replaceWithEmptyJSON:groups]]] forKey:@"groups"];
-        [event setValue:[self truncate:[AMPUtils makeJSONSerializable:[self replaceWithEmptyJSON:groupProperties]]] forKey:@"group_properties"];
-        [event setValue:[NSNumber numberWithLongLong:outOfSession ? -1 : self->_sessionId] forKey:@"session_id"];
-        [event setValue:timestamp forKey:@"timestamp"];
-
+        if (_batchMode) {
+            NSString *legacyID = userProperties[@"legacyID"];
+            if (legacyID) {
+                [event setValue:legacyID forKey:@"insert_id"];
+            }
+            NSString *installationID = userProperties[@"installationID"];
+            if (installationID) {
+                [event setValue:installationID forKey:@"device_id"];
+            }
+            [event setValue:@"iOS" forKey:@"platform"];
+            [event setValue:timestamp forKey:@"time"];
+        } else {
+            [event setValue:[self replaceWithEmptyJSON:apiProperties] forKey:@"api_properties"];
+            [event setValue:[self truncate:[AMPUtils makeJSONSerializable:[self replaceWithEmptyJSON:groupProperties]]] forKey:@"group_properties"];
+            [event setValue:timestamp forKey:@"timestamp"];
+        }
+        
         [self annotateEvent:event];
         
         AMPMiddlewarePayload * middlewarePayload = [[AMPMiddlewarePayload alloc] initWithEvent:event withExtra:extra];
@@ -1099,7 +1112,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                     sleep(self.throttleDelay);
                     resumeAfterThrottleDelay = YES;
                 } else {
-                    AMPLITUDE_LOG(@"Request throttled.");
+                    AMPLITUDE_ERROR(@"Request throttled.");
                 }
             } else {
                 AMPLITUDE_ERROR(@"ERROR: Connection response received:%ld, %@", (long)[httpResponse statusCode],
