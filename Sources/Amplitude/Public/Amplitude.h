@@ -32,8 +32,8 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_OPTIONS(NSInteger, kAMPSessionHandling) {
-    START_SESSION = 1L<<0,
-    STOP_SESSION = 1L<<1
+    StartSession = 1L<<0,
+    StopSession = 1L<<1
 };
 
 @class Amplitude;
@@ -597,6 +597,8 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
  @see [Setting Custom UserIds](https://github.com/amplitude/Amplitude-iOS#setting-custom-user-ids)
  */
 - (void)setUserId:(nullable NSString *)userId startNewSession:(kAMPSessionHandling)startNewSession;
+
+- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId startNewSession:(kAMPSessionHandling)startNewSession;
 
 /**
  Sets the deviceId.
