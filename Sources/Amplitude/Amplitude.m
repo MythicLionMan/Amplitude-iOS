@@ -1481,7 +1481,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     [self runOnBackgroundQueue:^{
         if ((sessionMode & StopSession) && self->_trackingSessionEvents) {
-            [self sendSessionEvent:kAMPSessionEndEvent];
+            [self endSession];
         }
 
         if (haveDeviceId) {
