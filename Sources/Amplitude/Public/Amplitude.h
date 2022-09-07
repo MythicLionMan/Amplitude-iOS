@@ -596,9 +596,9 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
 
  @see [Setting Custom UserIds](https://github.com/amplitude/Amplitude-iOS#setting-custom-user-ids)
  */
-- (void)setUserId:(nullable NSString *)userId startNewSession:(kAMPSessionHandling)startNewSession;
+- (void)setUserId:(nullable NSString *)userId sessionMode:(kAMPSessionHandling)sessionMode;
 
-- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId startNewSession:(kAMPSessionHandling)startNewSession;
+- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId sessionMode:(kAMPSessionHandling)sessionMode;
 
 /**
  Sets the deviceId.
