@@ -512,6 +512,8 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
 
 - (void)identify:(AMPIdentify *)identify outOfSession:(BOOL)outOfSession;
 
+- (void)identify:(AMPIdentify *)identify withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession;
+
 /**
 
  Adds properties that are tracked on the user level.

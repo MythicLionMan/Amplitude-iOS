@@ -1356,14 +1356,18 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 - (void)identify:(AMPIdentify *)identify {
-    [self identify:identify outOfSession:NO];
+    [self identify:identify withTimestamp:nil outOfSession:NO];
 }
 
 - (void)identify:(AMPIdentify *)identify outOfSession:(BOOL)outOfSession {
+    [self identify:identify withTimestamp:nil outOfSession:NO];
+}
+
+- (void)identify:(AMPIdentify *)identify withTimestamp:(NSNumber *)timestamp outOfSession:(BOOL)outOfSession {
     if (identify == nil || [identify.userPropertyOperations count] == 0) {
         return;
     }
-    [self logEvent:IDENTIFY_EVENT withEventProperties:nil withApiProperties:nil withUserProperties:identify.userPropertyOperations withGroups:nil withGroupProperties:nil withTimestamp:nil outOfSession:outOfSession];
+    [self logEvent:IDENTIFY_EVENT withEventProperties:nil withApiProperties:nil withUserProperties:identify.userPropertyOperations withGroups:nil withGroupProperties:nil withTimestamp:timestamp outOfSession:outOfSession];
 }
 
 - (void)groupIdentifyWithGroupType:(NSString *)groupType groupName:(NSObject *)groupName groupIdentify:(AMPIdentify *)groupIdentify {
