@@ -1480,7 +1480,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
     }
 
     [self runOnBackgroundQueue:^{
-        if ((sessionMode & StopSession != 0) && self->_trackingSessionEvents) {
+        if ((sessionMode & StopSession) && self->_trackingSessionEvents) {
             [self sendSessionEvent:kAMPSessionEndEvent];
         }
 
@@ -1497,7 +1497,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
             [[identityStoreEditor setUserId:self.userId] commit];
         }
 
-        if (sessionMode & StartSession != 0) {
+        if (sessionMode & StartSession) {
             NSNumber *timestamp = [NSNumber numberWithLongLong:[[self currentTime] timeIntervalSince1970] * 1000];
             [self setSessionId:[timestamp longLongValue]];
             [self refreshSessionTime:timestamp];
