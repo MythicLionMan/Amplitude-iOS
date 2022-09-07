@@ -600,7 +600,7 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
  */
 - (void)setUserId:(nullable NSString *)userId sessionMode:(kAMPSessionHandling)sessionMode;
 
-- (void)setUserId:(NSString *)userId deviceId:(NSString *)deviceId sessionMode:(kAMPSessionHandling)sessionMode;
+- (void)setUserId:(nullable NSString *)userId deviceId:(NSString *)deviceId sessionMode:(kAMPSessionHandling)sessionMode;
 
 /**
  Sets the deviceId.
