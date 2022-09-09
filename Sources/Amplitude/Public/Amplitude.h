@@ -759,6 +759,8 @@ typedef void (^AMPUploadCompleteBlock)(Amplitude *amp, BOOL success, BOOL fallba
 
 - (void)endSession;
 
+- (void)sendSessionEvent:(NSString *)sessionEvent timestamp:(NSNumber *)timestamp;
+
 /**
  Manually forces the instance to immediately upload all unsent events.
 

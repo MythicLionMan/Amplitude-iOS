@@ -1281,6 +1281,10 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 }
 
 - (void)sendSessionEvent:(NSString *)sessionEvent {
+    [self sendSessionEvent:sessionEvent timestamp:[self lastEventTime]];
+}
+
+- (void)sendSessionEvent:(NSString *)sessionEvent timestamp:(NSNumber *)timestamp {
     if (self.apiKey == nil) {
         AMPLITUDE_ERROR(@"ERROR: apiKey cannot be nil or empty, set apiKey with initializeApiKey: before sending session event");
         return;
@@ -1292,7 +1296,6 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
 
     NSMutableDictionary *apiProperties = [NSMutableDictionary dictionary];
     [apiProperties setValue:sessionEvent forKey:@"special"];
-    NSNumber *timestamp = [self lastEventTime];
     [self logEvent:sessionEvent withEventProperties:nil withApiProperties:apiProperties withUserProperties:nil withGroups:nil withGroupProperties:nil withTimestamp:timestamp outOfSession:NO];
 }
 
