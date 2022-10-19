@@ -1103,7 +1103,7 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                 [self uploadEventsWithLimit:self->_backoffUploadBatchSize];
             } else if ([httpResponse statusCode] == 429) {
                 // Double the current throttle delay
-                self.throttleDelay = self.throttleDelay > 0 ? self.throttleDelay*2 : 1;
+                self.throttleDelay = (self.throttleDelay > 0 && self.throttleDelay < self.maxThrottleDelay) ? self.throttleDelay*2 : 1;
 
                 if (self.throttleDelay < self.maxThrottleDelay) {
                     AMPLITUDE_LOG(@"Request throttled. Will retry with a delay of %d seconds.", self.throttleDelay);
