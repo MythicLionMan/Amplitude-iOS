@@ -1102,10 +1102,10 @@ static NSString *const SEQUENCE_NUMBER = @"sequence_number";
                 self->_updatingCurrently = NO;
                 [self uploadEventsWithLimit:self->_backoffUploadBatchSize];
             } else if ([httpResponse statusCode] == 429) {
-                // Double the current throttle delay
-                self.throttleDelay = (self.throttleDelay > 0 && self.throttleDelay < self.maxThrottleDelay) ? self.throttleDelay*2 : 1;
-
                 if (self.throttleDelay < self.maxThrottleDelay) {
+                    // Double the current throttle delay
+                    self.throttleDelay = self.throttleDelay > 0 ? self.throttleDelay*2 : 1;
+
                     AMPLITUDE_LOG(@"Request throttled. Will retry with a delay of %d seconds.", self.throttleDelay);
                     // This will block the background queue, but allow the app to continue in the foreground. Normally
                     // we'd like to not block the queue, but for this case we don't want to allow other queue processes to run.
